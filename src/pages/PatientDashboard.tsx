@@ -1,0 +1,343 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Mic, Video, Upload, Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { departments } from "@/data/constants";
+
+const PatientDashboard = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const [patientInfo, setPatientInfo] = useState<any>(null);
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [feedbackText, setFeedbackText] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedMedia, setRecordedMedia] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("text");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const userData = sessionStorage.getItem("patientUser");
+    if (!userData) {
+      navigate("/login/patient");
+      return;
+    }
+
+    setPatientInfo(JSON.parse(userData));
+  }, [navigate]);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("patientUser");
+    navigate("/");
+  };
+
+  const simulateRecording = () => {
+    setIsRecording(true);
+
+    // Simulate recording process
+    setTimeout(() => {
+      setIsRecording(false);
+      setRecordedMedia("data:mock");
+
+      toast({
+        title: activeTab === "voice" ? "Voice recorded" : "Video recorded",
+        description: "Your recording has been captured successfully.",
+      });
+    }, 3000);
+  };
+
+  const clearRecording = () => {
+    setRecordedMedia(null);
+  };
+
+  const simulateFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setRecordedMedia(URL.createObjectURL(file));
+
+      toast({
+        title: "File uploaded",
+        description: `${file.name} has been uploaded successfully.`,
+      });
+    }
+  };
+
+  const handleSubmitFeedback = () => {
+    if (!selectedDepartment) {
+      toast({
+        title: "Department required",
+        description:
+          "Please select a department before submitting your feedback.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (
+      (activeTab === "text" && !feedbackText) ||
+      ((activeTab === "voice" || activeTab === "video") && !recordedMedia)
+    ) {
+      toast({
+        title: "Feedback required",
+        description: "Please provide feedback before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // Simulate submission
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setFeedbackText("");
+      setRecordedMedia(null);
+      setSelectedDepartment("");
+
+      toast({
+        title: "Feedback submitted",
+        description: "Thank you for your valuable feedback!",
+      });
+    }, 1500);
+  };
+
+  if (!patientInfo) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="container-custom py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
+                {patientInfo.name.charAt(0)}
+              </div>
+              <div>
+                <h1 className="font-medium">{patientInfo.name}</h1>
+                <p className="text-sm text-gray-600">
+                  Patient ID: {patientInfo.patientId}
+                </p>
+              </div>
+            </div>
+            <Button variant="outline" onClick={handleLogout}>
+              Logout
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="container-custom py-8">
+        <Card className="max-w-3xl mx-auto">
+          <CardHeader>
+            <CardTitle>Submit Your Feedback</CardTitle>
+            <CardDescription>
+              Your feedback helps us improve our services. Please share your
+              experience.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="department">Select Department</Label>
+              <Select
+                value={selectedDepartment}
+                onValueChange={setSelectedDepartment}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a department" />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments
+                    .filter((dept) => dept.id !== "all")
+                    .map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
+              <TabsList className="grid grid-cols-3 mb-6">
+                <TabsTrigger value="text">Text Feedback</TabsTrigger>
+                <TabsTrigger value="voice">Voice Feedback</TabsTrigger>
+                <TabsTrigger value="video">Video Feedback</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="text" className="space-y-4">
+                <Textarea
+                  placeholder="Please share your experience with us..."
+                  className="min-h-[200px]"
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                />
+              </TabsContent>
+
+              <TabsContent value="voice" className="space-y-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                  {!recordedMedia ? (
+                    <div className="space-y-4">
+                      <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Mic className="h-8 w-8 text-primary" />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="font-medium">
+                          Record Your Voice Feedback
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Click the button below to start recording or upload an
+                          audio file.
+                        </p>
+                      </div>
+                      <div className="flex justify-center space-x-4">
+                        <Button
+                          onClick={simulateRecording}
+                          disabled={isRecording}
+                          className="space-x-2"
+                        >
+                          <Mic className="h-4 w-4" />
+                          <span>
+                            {isRecording ? "Recording..." : "Start Recording"}
+                          </span>
+                        </Button>
+                        <div className="relative">
+                          <Button variant="outline" className="space-x-2">
+                            <Upload className="h-4 w-4" />
+                            <span>Upload Audio</span>
+                          </Button>
+                          <input
+                            type="file"
+                            accept="audio/*"
+                            onChange={simulateFileUpload}
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                        <Check className="h-8 w-8 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Audio Ready</h3>
+                        <p className="text-sm text-gray-600">
+                          Your audio has been recorded successfully.
+                        </p>
+                      </div>
+                      <Button variant="outline" onClick={clearRecording}>
+                        Record Again
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="video" className="space-y-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                  {!recordedMedia ? (
+                    <div className="space-y-4">
+                      <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Video className="h-8 w-8 text-primary" />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="font-medium">
+                          Record Your Video Feedback
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Click the button below to start recording or upload a
+                          video file.
+                        </p>
+                      </div>
+                      <div className="flex justify-center space-x-4">
+                        <Button
+                          onClick={simulateRecording}
+                          disabled={isRecording}
+                          className="space-x-2"
+                        >
+                          <Video className="h-4 w-4" />
+                          <span>
+                            {isRecording ? "Recording..." : "Start Recording"}
+                          </span>
+                        </Button>
+                        <div className="relative">
+                          <Button variant="outline" className="space-x-2">
+                            <Upload className="h-4 w-4" />
+                            <span>Upload Video</span>
+                          </Button>
+                          <input
+                            type="file"
+                            accept="video/*"
+                            onChange={simulateFileUpload}
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                        <Check className="h-8 w-8 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Video Ready</h3>
+                        <p className="text-sm text-gray-600">
+                          Your video has been recorded successfully.
+                        </p>
+                      </div>
+                      <Button variant="outline" onClick={clearRecording}>
+                        Record Again
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <div className="pt-4">
+              <Button
+                className="w-full btn-hover"
+                onClick={handleSubmitFeedback}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Submitting..." : "Submit Feedback"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    </div>
+  );
+};
+
+export default PatientDashboard;
