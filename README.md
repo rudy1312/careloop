@@ -6,8 +6,8 @@
 
 ### For Patients
 - Anonymous feedback via **text, audio, or video**
-- Optional Patient ID field (auto-generated UUID for privacy-safe tracking)
-- Simple, clean UI inspired by Apple design principles
+- Login Using PatientID
+- Simple, clean UI inspired by Human Interface Guidelines
 
 ### For Admins
 - Dashboard with:
@@ -15,6 +15,6 @@
   - Auto-generated tags (e.g., *billing*, *cleanliness*, *staff*)
   - Sentiment analysis
   - Weekly trend insights (e.g., charts showing rising issues)
-- Exportable reports (CSV/PDF) for internal action
+- Exportable reports for internal action
 
 ---
