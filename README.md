@@ -18,3 +18,18 @@
 - Exportable reports for internal action
 
 ---
+
+## 🚀 Quick Start
+
+### 1. Clone the repo
+```bash
+git clone https://github.com/spandan-mozumder/CareLoop.git
+cd CareLoop
+```
+
+### 2. Install dependencies: Frontend
+```bash
+cd server
+npm install
+npm run dev
+```
