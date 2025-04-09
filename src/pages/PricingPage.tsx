@@ -1,11 +1,44 @@
 import { Check } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { pricingPlans, faqData } from "@/data/constants";
+import { useToast } from "@/hooks/use-toast";
 
 const PricingPage = () => {
   const [isAnnual, setIsAnnual] = useState(true);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleGetStarted = (planName: string) => {
+    // Show toast notification with customized messages based on plan
+    toast({
+      title: `${planName} Plan Activated`,
+      description: getToastDescription(planName),
+      duration: 3000,
+    });
+
+    // For Professional plan, redirect to admin dashboard after a short delay
+    if (planName === "Professional") {
+      setTimeout(() => {
+        navigate("/admin/dashboard");
+      }, 1500);
+    }
+  };
+
+  // Helper function to get custom toast description based on plan
+  const getToastDescription = (planName: string): string => {
+    switch (planName) {
+      case "Starter":
+        return "Perfect for small clinics. Thanks for your interest!";
+      case "Professional":
+        return "Ideal for mid-sized hospitals. Redirecting to admin dashboard...";
+      case "Enterprise":
+        return "For large healthcare systems. Our team will contact you shortly!";
+      default:
+        return "Thank you for your interest!";
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -96,16 +129,15 @@ const PricingPage = () => {
                   ))}
                 </ul>
 
-                <Link to="/contact" className="block">
-                  <Button
-                    variant={plan.popular ? "default" : "outline"}
-                    className={`w-full btn-hover ${
-                      plan.popular ? "" : "border-gray-300"
-                    }`}
-                  >
-                    Get Started
-                  </Button>
-                </Link>
+                <Button
+                  variant={plan.popular ? "default" : "outline"}
+                  className={`w-full btn-hover ${
+                    plan.popular ? "" : "border-gray-300"
+                  }`}
+                  onClick={() => handleGetStarted(plan.name)}
+                >
+                  Get Started
+                </Button>
               </div>
             ))}
           </div>
@@ -146,20 +178,19 @@ const PricingPage = () => {
               Start your 14-day free trial today. No credit card required.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/login/admin">
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  className="btn-hover rounded-full px-6 bg-white text-primary hover:bg-gray-100"
-                >
-                  Start Free Trial
-                </Button>
-              </Link>
+              <Button
+                size="lg"
+                variant="outline"
+                className="btn-hover rounded-full px-6 border-white bg-white text-primary hover:bg-transparent"
+                onClick={() => handleGetStarted("Free Trial")}
+              >
+                Start Free Trial
+              </Button>
               <Link to="/demo">
                 <Button
                   size="lg"
                   variant="outline"
-                  className="btn-hover rounded-full px-6 border-white text-white hover:bg-white/10"
+                  className="btn-hover rounded-full px-6 border-white bg-white text-primary hover:bg-transparent"
                 >
                   Request Demo
                 </Button>

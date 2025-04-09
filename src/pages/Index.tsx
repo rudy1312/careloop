@@ -6,7 +6,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 to-cyan-50 section-padding">
+      <section className="bg-gradient-to-br from-blue-50 to-cyan-50 section-padding px-20">
         <div className="container-custom">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6 max-w-xl">
@@ -63,7 +63,7 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="section-padding">
+      <section className="section-padding px-20">
         <div className="container-custom">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="heading-2 text-gray-900 mb-4">
@@ -170,9 +170,9 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="section-padding">
+      <section className="section-padding px-36">
         <div className="container-custom">
-          <div className="bg-gradient-to-r from-primary to-secondary rounded-2xl p-8 md:p-12 text-white text-center">
+          <div className="bg-gradient-to-r from-primary to-secondary rounded-2xl shadow-lg p-8 md:p-12 text-white text-center">
             <h2 className="heading-2 mb-4">
               Ready to improve patient satisfaction?
             </h2>
@@ -184,8 +184,8 @@ const Index = () => {
               <Link to="/login/admin">
                 <Button
                   size="lg"
-                  variant="secondary"
-                  className="btn-hover rounded-full px-6 bg-white text-primary hover:bg-gray-100"
+                  variant="outline"
+                  className="btn-hover rounded-full px-6 bg-white border-white text-primary hover:bg-transparent"
                 >
                   Get Started
                 </Button>
@@ -194,7 +194,7 @@ const Index = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="btn-hover rounded-full px-6 border-white text-white hover:bg-white/10"
+                  className="btn-hover rounded-full px-6 border-white bg-white text-primary hover:bg-transparent"
                 >
                   View Pricing
                 </Button>

@@ -23,7 +23,7 @@ const AboutPage = () => {
       {/* Our Story Section */}
       <section className="section-padding">
         <div className="container-custom">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-12 items-center px-20">
             <div>
               <img
                 src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -66,7 +66,7 @@ const AboutPage = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 px-20">
             {[
               {
                 icon: <Users className="h-10 w-10 text-primary" />,
@@ -120,7 +120,7 @@ const AboutPage = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 px-20">
             {[
               {
                 name: "Dr. Emily Chen",
@@ -202,7 +202,11 @@ const AboutPage = () => {
             </p>
             <div className="pt-4 flex justify-center gap-4">
               <Link to="/login/admin">
-                <Button size="lg" className="btn-hover rounded-full px-6">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="btn-hover rounded-full px-6 hover:bg-cyan-500"
+                >
                   Get Started
                 </Button>
               </Link>
@@ -210,7 +214,7 @@ const AboutPage = () => {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="btn-hover rounded-full px-6"
+                  className="btn-hover rounded-full px-6 hover:bg-cyan-500"
                 >
                   Contact Us
                 </Button>
