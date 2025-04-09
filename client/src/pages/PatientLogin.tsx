@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -128,7 +128,7 @@ const PatientLogin = () => {
               </div>
             </CardContent>
 
-            <CardFooter>
+            <CardFooter className="flex-col space-y-4">
               <Button
                 type="submit"
                 className="w-full btn-hover"
@@ -136,6 +136,16 @@ const PatientLogin = () => {
               >
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
+
+              <p className="text-sm text-center">
+                Don't have an account?{" "}
+                <Link
+                  to="/register/patient"
+                  className="text-primary font-medium hover:underline"
+                >
+                  Register now
+                </Link>
+              </p>
             </CardFooter>
           </form>
         </Card>

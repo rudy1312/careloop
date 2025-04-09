@@ -42,7 +42,7 @@ const registration = asyncHandler(async (req, res) => {
 });
 
 const logging = asyncHandler(async (req, res) => {
-    const { fullName, email, position, password, hospitalID } = req.body
+    const { email, password } = req.body
 
     const existedAdmin = await Admin.findOne({
         $or: [{ email }]
