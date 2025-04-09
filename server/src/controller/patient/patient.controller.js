@@ -95,10 +95,25 @@ const feeding = asyncHandler(async (req, res) => {
         }
     )
 
-})
+});
+
+const getMyFeed = asyncHandler(async (req, res) => {
+    const { patientID } = req.body;
+    const myFeed = await Feedback.find({ patientID: patientID });
+    const count = myFeed.length;
+
+    return res.status(200).json(
+        {
+            count: count,
+            my_feedbacks: myFeed,
+            msg: "successfully fetched feedbacks!"
+        }
+    )
+});
 
 export {
     registration,
     logging,
-    feeding
+    feeding,
+    getMyFeed
 };

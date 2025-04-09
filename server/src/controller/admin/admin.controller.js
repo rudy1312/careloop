@@ -42,7 +42,7 @@ const registration = asyncHandler(async (req, res) => {
 });
 
 const logging = asyncHandler(async (req, res) => {
-    const { email, password } = req.body
+    const { fullName, email, position, password, hospitalID } = req.body
 
     const existedAdmin = await Admin.findOne({
         $or: [{ email }]
@@ -190,9 +190,44 @@ const GetDepartmentAnalysis = asyncHandler(async (req, res) => {
     return res.status(200).json(
         {
             department: deptID,
+            feed: feed,
             posetiveCount: posetiveCount,
             negativeCount: negativeCount,
             neutralCount: neutralCount
+        }
+    )
+});
+
+const respondToFeed = asyncHandler(async(req, res) => {
+    const { feedbackID, response } = req.body;
+    const feedback = await Feedback.findById(feedbackID);
+
+    if(!feedback) {
+        throw new ApiErr(409, "no feedback found!")
+    }
+
+    feedback.response = response;
+    feedback.response_status = true;
+
+    await feedback.save();
+
+    return res.status(200).json(
+        {
+            new: feedback,
+            msg: "Feedback responded"
+        }
+    )
+
+});
+
+const hospitalBasedFeed = asyncHandler(async(req, res) => {
+    const { hospitalID } = req.body;
+    const feedback = await Feedback.find({ hospitalID: hospitalID });
+
+    return res.status(200).json(
+        {
+            feed: feedback,
+            msg: "Feedback recieved!"
         }
     )
 });
@@ -203,5 +238,7 @@ export {
     getAllFeedbacks,
     getAllTopics,
     getAllDepartments,
-    GetDepartmentAnalysis
+    GetDepartmentAnalysis,
+    respondToFeed,
+    hospitalBasedFeed
 };
