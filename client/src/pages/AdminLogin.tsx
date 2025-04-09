@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import Cookies from "js-cookie";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -33,28 +34,35 @@ const AdminLogin = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-  
+
     try {
-      const response = await fetch("http://localhost:3000/bloom/v1/api/admin/log", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-  
+      const response = await fetch(
+        "http://localhost:3000/bloom/v1/api/admin/log",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.message || "Login failed");
       }
-  
+
       toast({
         title: "Login successful",
         description: "Welcome to the admin dashboard.",
       });
-  
-      sessionStorage.setItem("adminUser", JSON.stringify(data.admin));
+
+      const inFiveHours = new Date(new Date().getTime() + 5 * 60 * 60 * 1000);
+      Cookies.set("adminLoginData", JSON.stringify(formData), {
+        expires: inFiveHours,
+      });
+
       navigate("/admin/dashboard");
     } catch (err: any) {
       toast({

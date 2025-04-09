@@ -1,137 +1,193 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Mic, Video, Upload, Check, User, Brush, CreditCard, MessageSquare, Zap, Utensils, Bed, Stethoscope, Smartphone } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { departments } from '@/data/constants';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Mic,
+  Video,
+  Upload,
+  Check,
+  User,
+  Brush,
+  CreditCard,
+  MessageSquare,
+  Zap,
+  Utensils,
+  Bed,
+  Stethoscope,
+  Smartphone,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { departments } from "@/data/constants";
+import Cookies from "js-cookie";
 
 const grievanceAreas = [
-  { id: 'staff', name: 'Staff', icon: User },
-  { id: 'cleanliness', name: 'Cleanliness', icon: Brush }, // Changed from Broom to Brush
-  { id: 'billing', name: 'Billing', icon: CreditCard },
-  { id: 'communication', name: 'Communication', icon: MessageSquare },
-  { id: 'efficiency', name: 'Efficiency', icon: Zap },
-  { id: 'food-amenities', name: 'Food and Amenities', icon: Utensils },
-  { id: 'comfort-privacy', name: 'Comfort and Privacy', icon: Bed },
-  { id: 'post-discharge', name: 'Post-Discharge Care', icon: Stethoscope }, // Changed from FirstAid to Stethoscope
-  { id: 'digital-experience', name: 'Digital Experience', icon: Smartphone }
+  { id: "staff", name: "Staff", icon: User },
+  { id: "cleanliness", name: "Cleanliness", icon: Brush }, // Changed from Broom to Brush
+  { id: "billing", name: "Billing", icon: CreditCard },
+  { id: "communication", name: "Communication", icon: MessageSquare },
+  { id: "efficiency", name: "Efficiency", icon: Zap },
+  { id: "food-amenities", name: "Food and Amenities", icon: Utensils },
+  { id: "comfort-privacy", name: "Comfort and Privacy", icon: Bed },
+  { id: "post-discharge", name: "Post-Discharge Care", icon: Stethoscope }, // Changed from FirstAid to Stethoscope
+  { id: "digital-experience", name: "Digital Experience", icon: Smartphone },
 ];
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [patientInfo, setPatientInfo] = useState<any>(null);
-  const [selectedDepartment, setSelectedDepartment] = useState('');
-  const [selectedGrievanceArea, setSelectedGrievanceArea] = useState('');
-  const [feedbackText, setFeedbackText] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedGrievanceArea, setSelectedGrievanceArea] = useState("");
+  const [feedbackText, setFeedbackText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [recordedMedia, setRecordedMedia] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('text');
+  const [activeTab, setActiveTab] = useState("text");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   useEffect(() => {
-    // Check if user is logged in
-    const userData = sessionStorage.getItem('patientUser');
-    if (!userData) {
-      navigate('/login/patient');
-      return;
+    const patientData = Cookies.get("patientData");
+    if (patientData) {
+      const parsedData = JSON.parse(patientData);
+      setPatientInfo(parsedData);
+    } else {
+      console.warn("No patient data found in cookies.");
+      navigate("/login/patient");
     }
-    
-    setPatientInfo(JSON.parse(userData));
   }, [navigate]);
-  
-  const handleLogout = () => {
-    sessionStorage.removeItem('patientUser');
-    navigate('/');
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:3000/bloom/v1/api/patient/out",
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json();
+
+      console.log("Logout response:", data);
+
+      // Clear sessionStorage
+      sessionStorage.removeItem("adminUser");
+
+      // Remove cookie (in case backend didn't or for double-safety)
+      Cookies.remove("patientData");
+
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error.message);
+    }
   };
-  
+
   const simulateRecording = () => {
     setIsRecording(true);
-    
+
     // Simulate recording process
     setTimeout(() => {
       setIsRecording(false);
-      setRecordedMedia('data:mock');
-      
+      setRecordedMedia("data:mock");
+
       toast({
-        title: activeTab === 'voice' ? "Voice recorded" : "Video recorded",
+        title: activeTab === "voice" ? "Voice recorded" : "Video recorded",
         description: "Your recording has been captured successfully.",
       });
     }, 3000);
   };
-  
+
   const clearRecording = () => {
     setRecordedMedia(null);
   };
-  
+
   const simulateFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setRecordedMedia(URL.createObjectURL(file));
-      
+
       toast({
         title: "File uploaded",
         description: `${file.name} has been uploaded successfully.`,
       });
     }
   };
-  
+
   const handleSubmitFeedback = () => {
     if (!selectedDepartment) {
       toast({
         title: "Department required",
-        description: "Please select a department before submitting your feedback.",
-        variant: "destructive"
+        description:
+          "Please select a department before submitting your feedback.",
+        variant: "destructive",
       });
       return;
     }
-    
+
     if (!selectedGrievanceArea) {
       toast({
         title: "Grievance area required",
-        description: "Please select the area of your grievance before submitting.",
-        variant: "destructive"
+        description:
+          "Please select the area of your grievance before submitting.",
+        variant: "destructive",
       });
       return;
     }
-    
-    if ((activeTab === 'text' && !feedbackText) || 
-        ((activeTab === 'voice' || activeTab === 'video') && !recordedMedia)) {
+
+    if (
+      (activeTab === "text" && !feedbackText) ||
+      ((activeTab === "voice" || activeTab === "video") && !recordedMedia)
+    ) {
       toast({
         title: "Feedback required",
         description: "Please provide feedback before submitting.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     // Simulate submission
     setTimeout(() => {
       setIsSubmitting(false);
-      setFeedbackText('');
+      setFeedbackText("");
       setRecordedMedia(null);
-      setSelectedDepartment('');
-      setSelectedGrievanceArea('');
-      
+      setSelectedDepartment("");
+      setSelectedGrievanceArea("");
+
       toast({
         title: "Feedback submitted",
         description: "Thank you for your valuable feedback!",
       });
     }, 1500);
   };
-  
+
   if (!patientInfo) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
   }
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -144,7 +200,9 @@ const PatientDashboard = () => {
               </div>
               <div>
                 <h1 className="font-medium">{patientInfo.name}</h1>
-                <p className="text-sm text-gray-600">Patient ID: {patientInfo.patientId}</p>
+                <p className="text-sm text-gray-600">
+                  Patient ID: {patientInfo.patientId}
+                </p>
               </div>
             </div>
             <Button variant="outline" onClick={handleLogout}>
@@ -153,42 +211,55 @@ const PatientDashboard = () => {
           </div>
         </div>
       </header>
-      
+
       <main className="container-custom py-8">
         <Card className="max-w-3xl mx-auto">
           <CardHeader>
             <CardTitle>Submit Your Feedback</CardTitle>
             <CardDescription>
-              Your feedback helps us improve our services. Please share your experience.
+              Your feedback helps us improve our services. Please share your
+              experience.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="department">Select Department</Label>
-                <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                <Select
+                  value={selectedDepartment}
+                  onValueChange={setSelectedDepartment}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Choose a department" />
                   </SelectTrigger>
                   <SelectContent>
-                    {departments.filter(dept => dept.id !== 'all').map(dept => (
-                      <SelectItem key={dept.id} value={dept.id}>
-                        {dept.name}
-                      </SelectItem>
-                    ))}
+                    {departments
+                      .filter((dept) => dept.id !== "all")
+                      .map((dept) => (
+                        <SelectItem key={dept.id} value={dept.id}>
+                          {dept.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="grievance-area">Area of Grievance</Label>
-                <Select value={selectedGrievanceArea} onValueChange={setSelectedGrievanceArea}>
+                <Select
+                  value={selectedGrievanceArea}
+                  onValueChange={setSelectedGrievanceArea}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select area of concern" />
                   </SelectTrigger>
                   <SelectContent>
-                    {grievanceAreas.map(area => (
-                      <SelectItem key={area.id} value={area.id} className="flex items-center">
+                    {grievanceAreas.map((area) => (
+                      <SelectItem
+                        key={area.id}
+                        value={area.id}
+                        className="flex items-center"
+                      >
                         <div className="flex items-center gap-2">
                           <area.icon className="h-4 w-4 text-primary mr-2" />
                           {area.name}
@@ -199,14 +270,18 @@ const PatientDashboard = () => {
                 </Select>
               </div>
             </div>
-            
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
               <TabsList className="grid grid-cols-3 mb-6">
                 <TabsTrigger value="text">Text Feedback</TabsTrigger>
                 <TabsTrigger value="voice">Voice Feedback</TabsTrigger>
                 <TabsTrigger value="video">Video Feedback</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="text" className="space-y-4">
                 <Textarea
                   placeholder="Please share your experience with us..."
@@ -215,7 +290,7 @@ const PatientDashboard = () => {
                   onChange={(e) => setFeedbackText(e.target.value)}
                 />
               </TabsContent>
-              
+
               <TabsContent value="voice" className="space-y-4">
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
                   {!recordedMedia ? (
@@ -224,26 +299,31 @@ const PatientDashboard = () => {
                         <Mic className="h-8 w-8 text-primary" />
                       </div>
                       <div className="space-y-2">
-                        <h3 className="font-medium">Record Your Voice Feedback</h3>
+                        <h3 className="font-medium">
+                          Record Your Voice Feedback
+                        </h3>
                         <p className="text-sm text-gray-600">
-                          Click the button below to start recording or upload an audio file.
+                          Click the button below to start recording or upload an
+                          audio file.
                         </p>
                       </div>
                       <div className="flex justify-center space-x-4">
-                        <Button 
-                          onClick={simulateRecording} 
+                        <Button
+                          onClick={simulateRecording}
                           disabled={isRecording}
                           className="space-x-2"
                         >
                           <Mic className="h-4 w-4" />
-                          <span>{isRecording ? "Recording..." : "Start Recording"}</span>
+                          <span>
+                            {isRecording ? "Recording..." : "Start Recording"}
+                          </span>
                         </Button>
                         <div className="relative">
                           <Button variant="outline" className="space-x-2">
                             <Upload className="h-4 w-4" />
                             <span>Upload Audio</span>
                           </Button>
-                          <input 
+                          <input
                             type="file"
                             accept="audio/*"
                             onChange={simulateFileUpload}
@@ -263,17 +343,14 @@ const PatientDashboard = () => {
                           Your audio has been recorded successfully.
                         </p>
                       </div>
-                      <Button 
-                        variant="outline" 
-                        onClick={clearRecording}
-                      >
+                      <Button variant="outline" onClick={clearRecording}>
                         Record Again
                       </Button>
                     </div>
                   )}
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="video" className="space-y-4">
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
                   {!recordedMedia ? (
@@ -282,26 +359,31 @@ const PatientDashboard = () => {
                         <Video className="h-8 w-8 text-primary" />
                       </div>
                       <div className="space-y-2">
-                        <h3 className="font-medium">Record Your Video Feedback</h3>
+                        <h3 className="font-medium">
+                          Record Your Video Feedback
+                        </h3>
                         <p className="text-sm text-gray-600">
-                          Click the button below to start recording or upload a video file.
+                          Click the button below to start recording or upload a
+                          video file.
                         </p>
                       </div>
                       <div className="flex justify-center space-x-4">
-                        <Button 
-                          onClick={simulateRecording} 
+                        <Button
+                          onClick={simulateRecording}
                           disabled={isRecording}
                           className="space-x-2"
                         >
                           <Video className="h-4 w-4" />
-                          <span>{isRecording ? "Recording..." : "Start Recording"}</span>
+                          <span>
+                            {isRecording ? "Recording..." : "Start Recording"}
+                          </span>
                         </Button>
                         <div className="relative">
                           <Button variant="outline" className="space-x-2">
                             <Upload className="h-4 w-4" />
                             <span>Upload Video</span>
                           </Button>
-                          <input 
+                          <input
                             type="file"
                             accept="video/*"
                             onChange={simulateFileUpload}
@@ -321,10 +403,7 @@ const PatientDashboard = () => {
                           Your video has been recorded successfully.
                         </p>
                       </div>
-                      <Button 
-                        variant="outline" 
-                        onClick={clearRecording}
-                      >
+                      <Button variant="outline" onClick={clearRecording}>
                         Record Again
                       </Button>
                     </div>
@@ -332,9 +411,9 @@ const PatientDashboard = () => {
                 </div>
               </TabsContent>
             </Tabs>
-            
+
             <div className="pt-4">
-              <Button 
+              <Button
                 className="w-full btn-hover"
                 onClick={handleSubmitFeedback}
                 disabled={isSubmitting}

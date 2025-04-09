@@ -15,22 +15,12 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import axios from "axios";
 
-const patientSchema = z
-  .object({
-    name: z.string().min(3, "Name must be at least 3 characters"),
-    patientId: z.string().min(3, "ID must be at least 3 characters"),
-    mobileNumber: z
-      .string()
-      .min(10, "Mobile number must be at least 10 digits"),
-    hospitalId: z.string().min(3, "Hospital ID must be at least 3 characters"),
-    email: z.string().email("Please enter a valid email"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
+const patientSchema = z.object({
+  name: z.string().min(3, "Name must be at least 3 characters"),
+  patientId: z.string().min(3, "ID must be at least 3 characters"),
+  mobileNumber: z.string().min(10, "Mobile number must be at least 10 digits"),
+  hospitalId: z.string().min(3, "Hospital ID must be at least 3 characters"),
+});
 
 type PatientForm = z.infer<typeof patientSchema>;
 
@@ -43,9 +33,6 @@ const PatientRegister = () => {
     patientId: "",
     mobileNumber: "",
     hospitalId: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
   });
 
   const [errors, setErrors] = useState<
@@ -89,14 +76,15 @@ const PatientRegister = () => {
 
     // Simulate registration process
     try {
-      const response = await axios.post("http://localhost:3000/bloom/v1/api/admin/reg", {
-        fullName: formData.name,
-        patientID: formData.patientId,
-        mobile: formData.mobileNumber,
-        hospitalID: formData.hospitalId,
-        email: formData.email,
-        password: formData.password,
-      });
+      const response = await axios.post(
+        "http://localhost:3000/bloom/v1/api/patient/reg",
+        {
+          fullName: formData.name,
+          patientID: formData.patientId,
+          mobile: formData.mobileNumber,
+          hospitalID: formData.hospitalId,
+        }
+      );
 
       console.log("Backend response:", response.data);
 
@@ -105,7 +93,7 @@ const PatientRegister = () => {
         description: "Your account has been created. You can now log in.",
       });
 
-      navigate("/login/admin")
+      navigate("/login/patient");
     } catch (error: any) {
       console.error("Registration error:", error);
 
@@ -152,22 +140,6 @@ const PatientRegister = () => {
                 />
                 {errors.name && (
                   <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="john.doe@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={errors.email ? "border-red-500" : ""}
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
                 )}
               </div>
 
@@ -219,40 +191,6 @@ const PatientRegister = () => {
                 {errors.hospitalId && (
                   <p className="text-red-500 text-xs mt-1">
                     {errors.hospitalId}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={errors.password ? "border-red-500" : ""}
-                />
-                {errors.password && (
-                  <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className={errors.confirmPassword ? "border-red-500" : ""}
-                />
-                {errors.confirmPassword && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.confirmPassword}
                   </p>
                 )}
               </div>

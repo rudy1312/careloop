@@ -12,6 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 const PatientLogin = () => {
   const navigate = useNavigate();
@@ -31,34 +33,39 @@ const PatientLogin = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login process
-    setTimeout(() => {
-      setIsLoading(false);
-
-      // Normally you would validate these credentials against a backend
-      // For demo purposes, we'll just proceed with any input
+    try {
+      const response = await axios.post("http://localhost:3000/bloom/v1/api/patient/log", {
+        fullName: formData.name,
+        patientID: formData.patientId,
+        mobile: formData.mobileNumber,
+        hospitalID: formData.hospitalId,
+      });
 
       toast({
         title: "Login successful",
-        description: "Welcome to the patient feedback portal.",
+        description: response.data.msg,
       });
 
-      // Store user data in sessionStorage
-      sessionStorage.setItem(
-        "patientUser",
-        JSON.stringify({
-          name: formData.name,
-          patientId: formData.patientId,
-          hospitalId: formData.hospitalId,
-        })
-      );
-
       navigate("/patient/dashboard");
-    }, 1500);
+
+      const fiveHoursFromNow = new Date(new Date().getTime() + 5 * 60 * 60 * 1000);
+
+      Cookies.set("patientData", JSON.stringify(formData), { expires: fiveHoursFromNow });
+
+
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: error?.response?.data?.message || "Something went wrong",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

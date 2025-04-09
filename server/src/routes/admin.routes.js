@@ -3,6 +3,7 @@ import { Router } from "express";
 import {
     registration,
     logging,
+    logout,
     getAllFeedbacks,
     getAllTopics,
     getAllDepartments,
@@ -15,6 +16,7 @@ const router = Router();
 
 router.route("/reg").post(registration);
 router.route("/log").post(logging);
+router.route("/out").post(logout);
 router.route("/fetchAll").get(getAllFeedbacks);
 router.route("/fetchTopics").get(getAllTopics);
 router.route("/fetchDep").get(getAllDepartments);

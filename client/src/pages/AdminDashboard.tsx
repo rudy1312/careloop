@@ -47,6 +47,7 @@ import {
   departmentPerformanceData,
   COLORS,
 } from "@/data/constants";
+import Cookies from "js-cookie";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -58,13 +59,19 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     // Check if admin is logged in
-    const userData = sessionStorage.getItem("adminUser");
-    if (!userData) {
+
+    const adminData = Cookies.get("adminLoginData");
+
+    if (adminData) {
+      const parsedData = JSON.parse(adminData);
+      setAdminInfo(parsedData);
+    } else {
+      console.warn("No patient cookie found. Redirecting to login.");
       navigate("/login/admin");
       return;
     }
 
-    setAdminInfo(JSON.parse(userData));
+    setAdminInfo(JSON.parse(adminData));
 
     // Set feedback data based on the department filter
     if (selectedDepartment === "all") {
@@ -78,9 +85,30 @@ const AdminDashboard = () => {
     }
   }, [navigate, selectedDepartment]);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("adminUser");
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:3000/bloom/v1/api/admin/out",
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json();
+
+      console.log("Logout response:", data);
+
+      // Clear sessionStorage
+      sessionStorage.removeItem("adminUser");
+
+      // Remove cookie (in case backend didn't or for double-safety)
+      Cookies.remove("adminLoginData");
+
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error.message);
+    }
   };
 
   const handleDepartmentChange = (value: string) => {
