@@ -24,7 +24,7 @@
 ### 1. Clone the repo
 ```bash
 git clone https://github.com/spandan-mozumder/CareLoop.git
-cd client
+cd CareLoop
 ```
 
 ### 2. Install dependencies: Frontend
