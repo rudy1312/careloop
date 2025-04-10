@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { Feedback } from "./src/model/feedback.model.js";
 
-const MONGO_URI = "mongodb+srv://mozumderspandanprofessional:NHExVYAQnOqLmheN@spandancluster.hy9k3.mongodb.net/careloop?retryWrites=true&w=majority";
+const MONGO_URI = "mongo uri";
 
 const feedbackData = [
   {
