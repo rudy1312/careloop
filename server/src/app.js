@@ -22,4 +22,4 @@ app.get("/", (req, res) => {
 app.use("/bloom/v1/api/admin", adminRoutes);
 app.use("/bloom/v1/api/patient", patientRoutes);
 
-module.exports.handler = serverless(app);
+export {app};
