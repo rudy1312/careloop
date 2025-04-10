@@ -4,12 +4,16 @@ import serverless from "serverless-http";
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "https://care-loop.vercel.app",
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: "https://care-loop.vercel.app",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
+app.options("*", cors());
+
+
 app.use(express.json());
 
 import adminRoutes from "./routes/admin.routes.js";
