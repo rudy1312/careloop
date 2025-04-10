@@ -59,6 +59,8 @@ const AdminDashboard = () => {
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [feedbackList, setFeedbackList] = useState<any[]>([]);
   const [allFeedbacks, setAllFeedbacks] = useState<any[]>([]);
+  const [activeResponseIndex, setActiveResponseIndex] = useState(null);
+  const [responseMessage, setResponseMessage] = useState("");
 
   useEffect(() => {
     const fetchAllFeedbacks = async () => {
@@ -78,6 +80,7 @@ const AdminDashboard = () => {
     };
 
     const adminData = Cookies.get("adminLoginData");
+    console.log("Admin data from cookie:", adminData);
 
     if (adminData) {
       const parsedData = JSON.parse(adminData);
@@ -95,7 +98,11 @@ const AdminDashboard = () => {
       setFeedbackList(allFeedbacks);
     } else {
       setFeedbackList(
-        allFeedbacks.filter((item) => item.department === selectedDepartment)
+        allFeedbacks.filter(
+          (item) =>
+            item.departmentId?.toLowerCase().trim() ===
+            selectedDepartment.toLowerCase().trim()
+        )
       );
     }
   }, [selectedDepartment, allFeedbacks]);
@@ -128,6 +135,7 @@ const AdminDashboard = () => {
 
   const handleDepartmentChange = (value: string) => {
     setSelectedDepartment(value);
+    console.log("Selected department:", value);
   };
 
   const handleDownloadActionPlan = () => {
@@ -163,6 +171,21 @@ const AdminDashboard = () => {
         return null;
     }
   };
+
+  const handleRespondClick = (index) => {
+    setActiveResponseIndex(activeResponseIndex === index ? null : index);
+    setResponseMessage("");
+  };
+
+  const handleSubmitResponse = (idx) => {
+    // Replace this with actual API logic to save response
+    console.log("Submitting response for index", idx, ":", responseMessage);
+    setActiveResponseIndex(null); // Hide the input box
+  };
+
+  const filteredFeedbacks = feedbackList.filter(
+    (f) => f.hospitalID === adminInfo.hospitalId
+  );
 
   if (!adminInfo) {
     return (
@@ -238,7 +261,7 @@ const AdminDashboard = () => {
                 </div>
                 <div>
                   <p className="text-gray-600 text-sm">Total Feedback</p>
-                  <h3 className="text-2xl font-bold">{feedbackList.length}</h3>
+                  <h3 className="text-2xl font-bold">{filteredFeedbacks.length}</h3>
                 </div>
               </div>
             </CardContent>
@@ -254,7 +277,7 @@ const AdminDashboard = () => {
                   <p className="text-gray-600 text-sm">Positive</p>
                   <h3 className="text-2xl font-bold">
                     {
-                      feedbackList.filter((f) => f.sentiment === "positive")
+                      filteredFeedbacks.filter((f) => f.sentimentIndex === 1)
                         .length
                     }
                   </h3>
@@ -273,7 +296,7 @@ const AdminDashboard = () => {
                   <p className="text-gray-600 text-sm">Neutral</p>
                   <h3 className="text-2xl font-bold">
                     {
-                      feedbackList.filter((f) => f.sentiment === "neutral")
+                      filteredFeedbacks.filter((f) => f.sentimentIndex === 0)
                         .length
                     }
                   </h3>
@@ -292,7 +315,7 @@ const AdminDashboard = () => {
                   <p className="text-gray-600 text-sm">Negative</p>
                   <h3 className="text-2xl font-bold">
                     {
-                      feedbackList.filter((f) => f.sentiment === "negative")
+                      filteredFeedbacks.filter((f) => f.sentimentIndex === -1)
                         .length
                     }
                   </h3>
@@ -320,66 +343,132 @@ const AdminDashboard = () => {
               <CardContent>
                 <div className="overflow-x-auto">
                   {feedbackList.length > 0 && (
-                    <div className="mt-10 max-w-3xl mx-auto space-y-4">
-                      {feedbackList.map((fb, idx) => (
-                        <Card key={idx} className="bg-white shadow-sm border">
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-base font-medium">
+                    <div className="mt-12 max-w-5xl mx-auto space-y-6 px-4 sm:px-6 lg:px-0">
+                      {feedbackList
+                      .filter((fb)=>fb.hospitalID === adminInfo.hospitalId)
+                      .map((fb, idx) => (
+                        <Card
+                          key={idx}
+                          className="bg-white shadow-md border border-gray-200 rounded-2xl hover:shadow-lg transition-shadow duration-300"
+                        >
+                          <CardHeader className="pb-3 border-b border-gray-100">
+                            <CardTitle className="text-lg font-semibold text-gray-900">
                               Department: {fb.departmentId}
                             </CardTitle>
-                            <CardDescription className="text-sm">
+                            <CardDescription className="text-sm text-gray-600">
                               Topic: {fb.topic}
                             </CardDescription>
                           </CardHeader>
-                          <CardContent className="space-y-2 text-sm text-gray-700">
-                            <p>
-                              <span className="font-medium">Patient ID:</span>{" "}
-                              {fb.patientID}
-                            </p>
-                            <p>
-                              <span className="font-medium">Hospital ID:</span>{" "}
-                              {fb.hospitalID}
-                            </p>
-                            <p>
-                              <span className="font-medium">Sentiment:</span>{" "}
-                              {fb.sentimentIndex === -1
-                                ? "Negative"
-                                : fb.sentimentIndex === 1
-                                ? "Positive"
-                                : "Neutral"}
-                            </p>
-                            <p>
-                              <span className="font-medium">Content Type:</span>{" "}
-                              {fb.contentTypeIndex === 0
-                                ? "Text"
-                                : fb.contentTypeIndex === 1
-                                ? "Voice"
-                                : "Video"}
-                            </p>
-                            <p>
-                              <span className="font-medium">Feedback:</span>{" "}
-                              {fb.textContent || "—"}
-                            </p>
+                          <CardContent className="space-y-3 text-sm text-gray-700 p-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              <p>
+                                <span className="font-medium text-gray-900">
+                                  Patient ID:
+                                </span>{" "}
+                                {fb.patientID}
+                              </p>
+                              <p>
+                                <span className="font-medium text-gray-900">
+                                  Hospital ID:
+                                </span>{" "}
+                                {fb.hospitalID}
+                              </p>
+                              <p>
+                                <span className="font-medium text-gray-900">
+                                  Sentiment:
+                                </span>{" "}
+                                <span
+                                  className={`${
+                                    fb.sentimentIndex === -1
+                                      ? "text-red-500"
+                                      : fb.sentimentIndex === 1
+                                      ? "text-green-600"
+                                      : "text-yellow-600"
+                                  } font-semibold`}
+                                >
+                                  {fb.sentimentIndex === -1
+                                    ? "Negative"
+                                    : fb.sentimentIndex === 1
+                                    ? "Positive"
+                                    : "Neutral"}
+                                </span>
+                              </p>
+                              <p>
+                                <span className="font-medium text-gray-900">
+                                  Content Type:
+                                </span>{" "}
+                                {fb.contentTypeIndex === 0
+                                  ? "Text"
+                                  : fb.contentTypeIndex === 1
+                                  ? "Voice"
+                                  : "Video"}
+                              </p>
+                            </div>
+
+                            <div>
+                              <p>
+                                <span className="font-medium text-gray-900">
+                                  Feedback:
+                                </span>{" "}
+                                {fb.textContent || "—"}
+                              </p>
+                            </div>
+
                             {fb.mediaContent && (
-                              <p className="text-blue-500 underline">
+                              <p>
                                 <a
                                   href={fb.mediaContent}
                                   target="_blank"
                                   rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
                                 >
                                   View Media
                                 </a>
                               </p>
                             )}
-                            <div>
-                              <p>
-                                <span className="font-medium">
-                                  Admin Response:
-                                </span>{" "}
-                                {fb.response_status
-                                  ? fb.response
-                                  : "Not yet responded"}
-                              </p>
+
+                            <div className="pt-2 border-t border-gray-100 flex flex-col gap-5">
+                              <div className="flex gap-10 items-center">
+                                <p>
+                                  <span className="font-medium text-gray-900">
+                                    Admin Response:
+                                  </span>{" "}
+                                  {fb.response_status
+                                    ? fb.response
+                                    : "Not yet responded"}
+                                </p>
+                                <Button
+                                  variant="outline"
+                                  onClick={() => handleRespondClick(idx)}
+                                >
+                                  Respond
+                                </Button>
+                              </div>
+                              {activeResponseIndex === idx && (
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                  <input
+                                    type="text"
+                                    value={responseMessage}
+                                    onChange={(e) =>
+                                      setResponseMessage(e.target.value)
+                                    }
+                                    placeholder="Enter your response..."
+                                    className="border rounded-md px-4 py-2 w-full sm:w-2/3"
+                                  />
+                                  <Button
+                                    onClick={() => handleSubmitResponse(idx)}
+                                  >
+                                    Submit
+                                  </Button>
+
+                                  <Button
+                                    onClick={() => handleRespondClick(idx)}
+                                    variant="outline"
+                                  >
+                                    Close
+                                  </Button>
+                                </div>
+                              )}
                             </div>
                           </CardContent>
                         </Card>

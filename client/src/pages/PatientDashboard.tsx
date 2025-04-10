@@ -446,61 +446,93 @@ const PatientDashboard = () => {
         </Card>
 
         {myFeedbacks.length > 0 && (
-          <div className="mt-10 max-w-3xl mx-auto space-y-4">
-            <h2 className="text-xl font-semibold mb-2">Previous Feedbacks</h2>
+          <div className="mt-12 max-w-5xl mx-auto space-y-6 px-4 sm:px-6 lg:px-0">
             {myFeedbacks.map((fb, idx) => (
-              <Card key={idx} className="bg-white shadow-sm border">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base font-medium">
+              <Card
+                key={idx}
+                className="bg-white shadow-md border border-gray-200 rounded-2xl hover:shadow-lg transition-shadow duration-300"
+              >
+                <CardHeader className="pb-3 border-b border-gray-100">
+                  <CardTitle className="text-lg font-semibold text-gray-900">
                     Department: {fb.departmentId}
                   </CardTitle>
-                  <CardDescription className="text-sm">
+                  <CardDescription className="text-sm text-gray-600">
                     Topic: {fb.topic}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2 text-sm text-gray-700">
-                  <p>
-                    <span className="font-medium">Patient ID:</span>{" "}
-                    {fb.patientID}
-                  </p>
-                  <p>
-                    <span className="font-medium">Hospital ID:</span>{" "}
-                    {fb.hospitalID}
-                  </p>
-                  <p>
-                    <span className="font-medium">Sentiment:</span>{" "}
-                    {fb.sentimentIndex === -1
-                      ? "Negative"
-                      : fb.sentimentIndex === 1
-                      ? "Positive"
-                      : "Neutral"}
-                  </p>
-                  <p>
-                    <span className="font-medium">Content Type:</span>{" "}
-                    {fb.contentTypeIndex === 0
-                      ? "Text"
-                      : fb.contentTypeIndex === 1
-                      ? "Voice"
-                      : "Video"}
-                  </p>
-                  <p>
-                    <span className="font-medium">Feedback:</span>{" "}
-                    {fb.textContent || "—"}
-                  </p>
+                <CardContent className="space-y-3 text-sm text-gray-700 p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <p>
+                      <span className="font-medium text-gray-900">
+                        Patient ID:
+                      </span>{" "}
+                      {fb.patientID}
+                    </p>
+                    <p>
+                      <span className="font-medium text-gray-900">
+                        Hospital ID:
+                      </span>{" "}
+                      {fb.hospitalID}
+                    </p>
+                    <p>
+                      <span className="font-medium text-gray-900">
+                        Sentiment:
+                      </span>{" "}
+                      <span
+                        className={`${
+                          fb.sentimentIndex === -1
+                            ? "text-red-500"
+                            : fb.sentimentIndex === 1
+                            ? "text-green-600"
+                            : "text-yellow-600"
+                        } font-semibold`}
+                      >
+                        {fb.sentimentIndex === -1
+                          ? "Negative"
+                          : fb.sentimentIndex === 1
+                          ? "Positive"
+                          : "Neutral"}
+                      </span>
+                    </p>
+                    <p>
+                      <span className="font-medium text-gray-900">
+                        Content Type:
+                      </span>{" "}
+                      {fb.contentTypeIndex === 0
+                        ? "Text"
+                        : fb.contentTypeIndex === 1
+                        ? "Voice"
+                        : "Video"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p>
+                      <span className="font-medium text-gray-900">
+                        Feedback:
+                      </span>{" "}
+                      {fb.textContent || "—"}
+                    </p>
+                  </div>
+
                   {fb.mediaContent && (
-                    <p className="text-blue-500 underline">
+                    <p>
                       <a
                         href={fb.mediaContent}
                         target="_blank"
                         rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
                       >
                         View Media
                       </a>
                     </p>
                   )}
-                  <div>
+
+                  <div className="pt-2 border-t border-gray-100">
                     <p>
-                      <span className="font-medium">Admin Response:</span>{" "}
+                      <span className="font-medium text-gray-900">
+                        Admin Response:
+                      </span>{" "}
                       {fb.response_status ? fb.response : "Not yet responded"}
                     </p>
                   </div>
