@@ -77,7 +77,7 @@ const PatientRegister = () => {
     // Simulate registration process
     try {
       const response = await axios.post(
-        "https://careloop.onrender.com/bloom/v1/api/patient/reg",
+        "http://localhost:3000/bloom/v1/api/patient/reg",
         {
           fullName: formData.name,
           patientID: formData.patientId,
