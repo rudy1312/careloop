@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import serverless from "serverless-http";
 
 const app = express();
 
@@ -21,4 +22,4 @@ app.get("/", (req, res) => {
 app.use("/bloom/v1/api/admin", adminRoutes);
 app.use("/bloom/v1/api/patient", patientRoutes);
 
-export { app };
+module.exports.handler = serverless(app);
