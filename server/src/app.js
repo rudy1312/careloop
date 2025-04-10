@@ -6,7 +6,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://care-loop.vercel.app/",
+    origin: "https://care-loop.vercel.app",
     credentials: true,
   })
 );
