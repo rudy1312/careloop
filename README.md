@@ -90,3 +90,10 @@ brew install ffmpeg
 ```bash
 sudo apt update && sudo apt install ffmpeg
 ```
+You can directly view the ML outputs cell by cell in the notebook
+
+## What's left to do?
+- Integrate ML with backend
+- Report Generation
+- Multi Modal sentiment analysis using Voice, Text and Video
+- View Transcript, tags and sentiment in Fronetned before sumbitting feedback.
