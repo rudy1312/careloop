@@ -48,7 +48,7 @@ import {
   COLORS,
 } from "@/data/constants";
 import Cookies from "js-cookie";
-import axios, { all } from "axios";
+import axios from "axios";
 import { set } from "date-fns";
 
 const AdminDashboard = () => {

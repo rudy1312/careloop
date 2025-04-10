@@ -64,11 +64,13 @@ const PatientDashboard = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [myFeedbacks, setMyFeedbacks] = useState<any[]>([]);
 
+  const patientUrl = import.meta.env.VITE_PATIENT_ROUTE;
+
   useEffect(() => {
     const fetchFeedbacks = async (patientID) => {
       try {
         const res = await axios.post(
-          "http://localhost:3000/bloom/v1/api/patient/fetchMy",
+          `${patientUrl}/fetchMy`,
           { patientID }
         );
         const response = res.data;
@@ -97,7 +99,7 @@ const PatientDashboard = () => {
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3000/bloom/v1/api/patient/out",
+        `${patientUrl}/out`,
         {
           method: "POST",
           credentials: "include",
