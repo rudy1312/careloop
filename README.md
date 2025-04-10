@@ -49,6 +49,7 @@ npm run dev
 ```
 
 ### 3. Install dependencies: Backend
+make sure to have your own MongDB key in .env
 ```bash
 cd server
 npm install
