@@ -36,6 +36,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { departments } from "@/data/constants";
 import Cookies from "js-cookie";
+import axios from "axios";
 
 const grievanceAreas = [
   { id: "staff", name: "Staff", icon: User },
@@ -61,12 +62,32 @@ const PatientDashboard = () => {
   const [recordedMedia, setRecordedMedia] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("text");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [myFeedbacks, setMyFeedbacks] = useState<any[]>([]);
 
   useEffect(() => {
+    const fetchFeedbacks = async (patientID) => {
+      try {
+        const res = await axios.post(
+          "http://localhost:3000/bloom/v1/api/patient/fetchMy",
+          { patientID }
+        );
+        const response = res.data;
+        console.log("✅ Feedbacks fetched:", res.data);
+        setMyFeedbacks(response.my_feedbacks);
+      } catch (error) {
+        console.error("❌ Failed to fetch feedbacks:", error);
+      }
+    };
+
     const patientData = Cookies.get("patientData");
+
     if (patientData) {
       const parsedData = JSON.parse(patientData);
+      console.log("Patient data from cookies:", parsedData);
       setPatientInfo(parsedData);
+
+      // Call API only after setting state
+      fetchFeedbacks(parsedData.patientId);
     } else {
       console.warn("No patient data found in cookies.");
       navigate("/login/patient");
@@ -423,6 +444,71 @@ const PatientDashboard = () => {
             </div>
           </CardContent>
         </Card>
+
+        {myFeedbacks.length > 0 && (
+          <div className="mt-10 max-w-3xl mx-auto space-y-4">
+            <h2 className="text-xl font-semibold mb-2">Previous Feedbacks</h2>
+            {myFeedbacks.map((fb, idx) => (
+              <Card key={idx} className="bg-white shadow-sm border">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base font-medium">
+                    Department: {fb.departmentId}
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    Topic: {fb.topic}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm text-gray-700">
+                  <p>
+                    <span className="font-medium">Patient ID:</span>{" "}
+                    {fb.patientID}
+                  </p>
+                  <p>
+                    <span className="font-medium">Hospital ID:</span>{" "}
+                    {fb.hospitalID}
+                  </p>
+                  <p>
+                    <span className="font-medium">Sentiment:</span>{" "}
+                    {fb.sentimentIndex === -1
+                      ? "Negative"
+                      : fb.sentimentIndex === 1
+                      ? "Positive"
+                      : "Neutral"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Content Type:</span>{" "}
+                    {fb.contentTypeIndex === 0
+                      ? "Text"
+                      : fb.contentTypeIndex === 1
+                      ? "Voice"
+                      : "Video"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Feedback:</span>{" "}
+                    {fb.textContent || "—"}
+                  </p>
+                  {fb.mediaContent && (
+                    <p className="text-blue-500 underline">
+                      <a
+                        href={fb.mediaContent}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View Media
+                      </a>
+                    </p>
+                  )}
+                  <div>
+                    <p>
+                      <span className="font-medium">Admin Response:</span>{" "}
+                      {fb.response_status ? fb.response : "Not yet responded"}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

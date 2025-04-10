@@ -48,6 +48,8 @@ import {
   COLORS,
 } from "@/data/constants";
 import Cookies from "js-cookie";
+import axios, { all } from "axios";
+import { set } from "date-fns";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -56,34 +58,47 @@ const AdminDashboard = () => {
   const [adminInfo, setAdminInfo] = useState<any>(null);
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [feedbackList, setFeedbackList] = useState<any[]>([]);
+  const [allFeedbacks, setAllFeedbacks] = useState<any[]>([]);
 
   useEffect(() => {
-    // Check if admin is logged in
+    const fetchAllFeedbacks = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:3000/bloom/v1/api/admin/fetchAll",
+          {
+            withCredentials: true,
+          }
+        );
+        const data = res.data.allFeedbacks;
+        setAllFeedbacks(data);
+        console.log("Fetched feedbacks:", data);
+      } catch (error) {
+        console.error("Error fetching feedbacks:", error.message);
+      }
+    };
 
     const adminData = Cookies.get("adminLoginData");
 
     if (adminData) {
       const parsedData = JSON.parse(adminData);
       setAdminInfo(parsedData);
+      fetchAllFeedbacks();
     } else {
-      console.warn("No patient cookie found. Redirecting to login.");
+      console.warn("No admin cookie found. Redirecting to login.");
       navigate("/login/admin");
-      return;
     }
+  }, [navigate]);
 
-    setAdminInfo(JSON.parse(adminData));
-
-    // Set feedback data based on the department filter
+  // Separate effect for filtering feedbacks based on selectedDepartment and allFeedbacks
+  useEffect(() => {
     if (selectedDepartment === "all") {
-      setFeedbackList(mockFeedbackData);
+      setFeedbackList(allFeedbacks);
     } else {
       setFeedbackList(
-        mockFeedbackData.filter(
-          (item) => item.department === selectedDepartment
-        )
+        allFeedbacks.filter((item) => item.department === selectedDepartment)
       );
     }
-  }, [navigate, selectedDepartment]);
+  }, [selectedDepartment, allFeedbacks]);
 
   const handleLogout = async () => {
     try {
@@ -304,62 +319,73 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="pb-3 font-medium">Patient</th>
-                        <th className="pb-3 font-medium">Department</th>
-                        <th className="pb-3 font-medium">Type</th>
-                        <th className="pb-3 font-medium">Feedback</th>
-                        <th className="pb-3 font-medium">Sentiment</th>
-                        <th className="pb-3 font-medium">Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {feedbackList.map((feedback) => (
-                        <tr
-                          key={feedback.id}
-                          className="border-b last:border-b-0"
-                        >
-                          <td className="py-4">
-                            <div>
-                              <div className="font-medium">
-                                {feedback.patientName}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {feedback.patientId}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-4">{feedback.departmentName}</td>
-                          <td className="py-4">
-                            <div className="flex items-center">
-                              {getTypeIcon(feedback.type)}
-                              <span className="ml-1 capitalize">
-                                {feedback.type}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="py-4 max-w-[300px] truncate">
-                            {feedback.type === "text" ? (
-                              feedback.content
-                            ) : (
-                              <Button variant="outline" size="sm">
-                                View{" "}
-                                {feedback.type === "voice" ? "Audio" : "Video"}
-                              </Button>
+                  {feedbackList.length > 0 && (
+                    <div className="mt-10 max-w-3xl mx-auto space-y-4">
+                      {feedbackList.map((fb, idx) => (
+                        <Card key={idx} className="bg-white shadow-sm border">
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-base font-medium">
+                              Department: {fb.departmentId}
+                            </CardTitle>
+                            <CardDescription className="text-sm">
+                              Topic: {fb.topic}
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent className="space-y-2 text-sm text-gray-700">
+                            <p>
+                              <span className="font-medium">Patient ID:</span>{" "}
+                              {fb.patientID}
+                            </p>
+                            <p>
+                              <span className="font-medium">Hospital ID:</span>{" "}
+                              {fb.hospitalID}
+                            </p>
+                            <p>
+                              <span className="font-medium">Sentiment:</span>{" "}
+                              {fb.sentimentIndex === -1
+                                ? "Negative"
+                                : fb.sentimentIndex === 1
+                                ? "Positive"
+                                : "Neutral"}
+                            </p>
+                            <p>
+                              <span className="font-medium">Content Type:</span>{" "}
+                              {fb.contentTypeIndex === 0
+                                ? "Text"
+                                : fb.contentTypeIndex === 1
+                                ? "Voice"
+                                : "Video"}
+                            </p>
+                            <p>
+                              <span className="font-medium">Feedback:</span>{" "}
+                              {fb.textContent || "—"}
+                            </p>
+                            {fb.mediaContent && (
+                              <p className="text-blue-500 underline">
+                                <a
+                                  href={fb.mediaContent}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  View Media
+                                </a>
+                              </p>
                             )}
-                          </td>
-                          <td className="py-4">
-                            {getSentimentBadge(feedback.sentiment)}
-                          </td>
-                          <td className="py-4 text-gray-600">
-                            {feedback.date}
-                          </td>
-                        </tr>
+                            <div>
+                              <p>
+                                <span className="font-medium">
+                                  Admin Response:
+                                </span>{" "}
+                                {fb.response_status
+                                  ? fb.response
+                                  : "Not yet responded"}
+                              </p>
+                            </div>
+                          </CardContent>
+                        </Card>
                       ))}
-                    </tbody>
-                  </table>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
