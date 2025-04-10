@@ -73,7 +73,7 @@ const AdminRegister = () => {
     setIsLoading(true);
     
     try {
-      const response = await axios.post("http://localhost:3000/bloom/v1/api/admin/reg", {
+      const response = await axios.post("https://careloop.onrender.com/bloom/v1/api/admin/reg", {
         fullName: formData.name,
         position: formData.position,
         hospitalID: formData.hospitalId,

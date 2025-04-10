@@ -37,7 +37,7 @@ const AdminLogin = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:3000/bloom/v1/api/admin/log",
+        "https://careloop.onrender.com/bloom/v1/api/admin/log",
         {
           method: "POST",
           headers: {

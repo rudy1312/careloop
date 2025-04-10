@@ -38,7 +38,7 @@ const PatientLogin = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:3000/bloom/v1/api/patient/log", {
+      const response = await axios.post("https://careloop.onrender.com/bloom/v1/api/patient/log", {
         fullName: formData.name,
         patientID: formData.patientId,
         mobile: formData.mobileNumber,
